@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern Cryptography</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #0099ff;
+        width: 100%;
+  height: 100%;
+
+  background: #000000;
+  --gap: 5em;
+  --line: 1px;
+  --color: rgba(255, 255, 255, 0.2);
+
+  background-image: linear-gradient(
+      -90deg,
+      transparent calc(var(--gap) - var(--line)),
+      var(--color) calc(var(--gap) - var(--line) + 1px),
+      var(--color) var(--gap)
+    ),
+    linear-gradient(
+      0deg,
+      transparent calc(var(--gap) - var(--line)),
+      var(--color) calc(var(--gap) - var(--line) + 1px),
+      var(--color) var(--gap)
+    );
+  background-size: var(--gap) var(--gap);
+    }
+    .container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        border-radius: 24px;
+        background-color: #fff;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    label {
+        font-weight: bold;
+    }
+    textarea, select {
+        width: calc(100% - 16px);
+        height: 40px;
+        padding: 8px;
+        margin-top: 5px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 24px;
+        resize: none;
+    }
+    button {
+        width: 20%;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 24px;
+        background-color: #0099ff;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    button:hover {
+        background-color: #0099ff;
+    }
+    p {
+        margin-top: 20px;
+        font-weight: bold;
+    }
+
+</style>
+</head>
+<body>
+<div class="container">
+    <h2 style="text-align: center; color: #0099ff;">Modern Cryptography</h2>
+    <label for="plaintext">Plaintext:</label>
+    <textarea id="plaintext" placeholder="Enter plaintext"></textarea>
+    <label for="key">Key:</label>
+    <textarea id="key" placeholder="Enter key"></textarea>
+    <label for="bit">Select Bit:</label>
+    <select id="bit">
+        <option value="3">3-bit</option>
+        <option value="4">4-bit</option>
+    </select>
+    <button onclick="encrypt()">Encrypt</button>
+    <button onclick="decrypt()">Decrypt</button>
+    <p id="ciphertext"></p>
+    <p id="decimal"></p>
+    <p id="hexadecimal"></p>
+</div>
+
+<script>
+function splitIntoGroups(str, size) {
+    var result = [];
+    for (var i = 0; i < str.length; i += size) {
+        result.push(str.slice(i, i + size));
+    }
+    return result;
+}
+
+function sumNumbers(arr) {
+    var sum = arr.reduce((a, b) => a + b, 0);
+    return sum;
+}
+
+function encrypt() {
+    var plaintext = document.getElementById("plaintext").value;
+    var key = document.getElementById("key").value;
+    var bit = parseInt(document.getElementById("bit").value);
+    
+    if (plaintext.length != key.length || plaintext.length % bit != 0 || key.length % bit != 0) {
+        alert("Plaintext and key lengths must be the same and multiples of the selected bit.");
+        return;
+    }
+    
+    var ciphertext = "";
+    for (var i = 0; i < plaintext.length; i++) {
+        ciphertext += (parseInt(plaintext[i]) ^ parseInt(key[i])).toString();
+    }
+    
+    var groups = splitIntoGroups(ciphertext, bit);
+    var decimalGroups = groups.map(group => parseInt(group, 2));
+    var hexadecimalGroups = decimalGroups.map(decimal => decimal.toString(16).toUpperCase());
+    
+    var decimalSum = sumNumbers(decimalGroups);
+    var hexadecimalSum = sumNumbers(hexadecimalGroups.map(hex => parseInt(hex, 16)));
+    
+    document.getElementById("ciphertext").innerText = "Ciphertext: " + groups.join(" ");
+    document.getElementById("decimal").innerText = "Decimal: " + decimalGroups.join(", ") + " = " + decimalSum;
+    document.getElementById("hexadecimal").innerText = "Hexadecimal: " + hexadecimalGroups.join(", ") + " = " + hexadecimalSum.toString(16).toUpperCase();
+}
+
+function decrypt() {
+    var ciphertext = document.getElementById("ciphertext").innerText.split(": ")[1].replace(/\s+/g, '');
+    var key = document.getElementById("key").value;
+    var bit = parseInt(document.getElementById("bit").value);
+    
+    if (ciphertext.length != key.length || ciphertext.length % bit != 0 || key.length % bit != 0) {
+        alert("Ciphertext and key lengths must be the same and multiples of the selected bit.");
+        return;
+    }
+    
+    var groups = splitIntoGroups(ciphertext, bit);
+    var plaintext = "";
+    for (var i = 0; i < groups.length; i++) {
+        plaintext += (parseInt(groups[i], 2) ^ parseInt(key.slice(i * bit, (i + 1) * bit), 2)).toString();
+    }
+    
+    var decimal = parseInt(plaintext, 2);
+    var hexadecimal = decimal.toString(16).toUpperCase();
+    
+    document.getElementById("plaintext").value = plaintext;
+    document.getElementById("decimal").innerText = "Decimal: " + decimal;
+    document.getElementById("hexadecimal").innerText = "Hexadecimal: " + hexadecimal;
+}
+</script>
+</body>
+</html>
